@@ -126,4 +126,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
   sections.forEach(function (section) { navObserver.observe(section); });
 
+  // -------- Title block: live sheet number as you scroll --------
+  var tbSheet = document.getElementById('tbSheet');
+  if (tbSheet) {
+    var sheetObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var num = entry.target.getAttribute('data-sheet');
+          if (num) tbSheet.textContent = num + ' / 05';
+        }
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('section[data-sheet]').forEach(function (section) {
+      sheetObserver.observe(section);
+    });
+  }
+
 });
