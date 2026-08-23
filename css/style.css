@@ -59,6 +59,18 @@ body{
 
 img, canvas{ display: block; max-width: 100%; }
 
+/* Subtle grain overlay — keeps flat blueprint blue from feeling like a CSS gradient */
+body::after{
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 a{ color: inherit; text-decoration: none; }
 
 h1,h2,h3{
@@ -72,6 +84,36 @@ h1,h2,h3{
 p{ margin: 0 0 1em; color: var(--muted); }
 
 ::selection{ background: var(--red); color: var(--paper); }
+
+/* Custom crosshair cursor — desktop only, a drafting-tool touch */
+@media (hover: hover) and (pointer: fine){
+  .crosshair{
+    position: fixed;
+    top: 0; left: 0;
+    width: 22px; height: 22px;
+    pointer-events: none;
+    z-index: 999;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity .3s var(--ease);
+  }
+  .crosshair.is-active{ opacity: 1; }
+  .crosshair::before, .crosshair::after{
+    content: "";
+    position: absolute;
+    background: var(--cyan);
+  }
+  .crosshair::before{ top: 50%; left: 0; width: 100%; height: 1px; transform: translateY(-50%); }
+  .crosshair::after{ left: 50%; top: 0; height: 100%; width: 1px; transform: translateX(-50%); }
+  .crosshair__dot{
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 3px; height: 3px;
+    background: var(--red);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+  }
+}
 
 :focus-visible{
   outline: 2px solid var(--cyan);
@@ -269,8 +311,26 @@ p{ margin: 0 0 1em; color: var(--muted); }
 }
 .btn--ghost:hover{ border-color: var(--cyan); color: var(--cyan); transform: translateY(-2px); }
 
+.hero__proof{
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-top: 1.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  border-top: 1px dashed var(--line);
+  padding-top: 1.1rem;
+}
+.hero__proof strong{
+  color: var(--cyan);
+  font-weight: 500;
+}
+.hero__proof-sep{ color: var(--line); }
+
 .hero__callouts{
-  margin-top: 2.5rem;
+  margin-top: 1.8rem;
   display: flex;
   gap: 2rem;
   flex-wrap: wrap;
@@ -598,6 +658,120 @@ p{ margin: 0 0 1em; color: var(--muted); }
 }
 .card__link:hover{ color: var(--cyan); border-color: var(--cyan); }
 
+.card__expand{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 1.1rem;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.card__expand i{
+  width: 8px; height: 8px;
+  border-right: 1px solid var(--cyan);
+  border-bottom: 1px solid var(--cyan);
+  transform: rotate(45deg);
+  transition: transform .25s var(--ease);
+}
+.card__expand[aria-expanded="true"] i{ transform: rotate(-135deg); }
+
+.card__detail{
+  border-top: 1px dashed var(--line);
+  padding-top: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.case{ margin: 0; }
+.case dt{
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.9rem;
+}
+.case dt:first-child{ margin-top: 0; }
+.case dd{
+  margin: 0.3rem 0 0;
+  font-size: 0.9rem;
+  color: var(--paper);
+  opacity: 0.85;
+  line-height: 1.55;
+}
+.case dd strong{ color: var(--cyan); font-weight: 600; }
+
+/* ============================= TESTIMONIALS ======================================= */
+
+.testimonials{
+  padding: clamp(5rem, 10vw, 8rem) var(--gutter);
+}
+
+.testimonials__grid{
+  max-width: var(--container);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.quote-card{
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 2rem;
+  margin: 0;
+  position: relative;
+}
+
+.quote-card__stamp{
+  position: absolute;
+  top: 1.4rem;
+  right: 1.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--red);
+  border: 1.5px solid var(--red);
+  padding: 0.2rem 0.5rem;
+  transform: rotate(8deg);
+  opacity: 0.85;
+}
+
+.quote-card blockquote{
+  margin: 0 0 1.6rem;
+  font-size: 0.98rem;
+  color: var(--paper);
+  opacity: 0.88;
+  line-height: 1.6;
+  padding-right: 2.5rem;
+}
+
+.quote-card figcaption{
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  border-top: 1px dashed var(--line);
+  padding-top: 0.9rem;
+}
+.quote-card figcaption strong{
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--paper);
+}
+.quote-card figcaption span{
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
 /* ============================= CONTACT ======================================= */
 
 .contact{
@@ -623,6 +797,15 @@ p{ margin: 0 0 1em; color: var(--muted); }
   transition: border-color .25s var(--ease);
 }
 .contact__email:hover{ border-color: var(--red); }
+
+.contact__note{
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
 
 .contact__socials{
   display: flex;
@@ -675,6 +858,7 @@ p{ margin: 0 0 1em; color: var(--muted); }
   .about__grid{ grid-template-columns: 1fr; }
   .about__photo{ max-width: 320px; }
   .work__grid{ grid-template-columns: 1fr; }
+  .testimonials__grid{ grid-template-columns: 1fr; }
   .titleblock{ display: none; }
 }
 
@@ -708,5 +892,7 @@ p{ margin: 0 0 1em; color: var(--muted); }
 @media (max-width: 480px){
   .hero{ padding-top: 5.5rem; }
   .hero__hint{ display: none; }
+  .hero__proof{ flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+  .hero__proof-sep{ display: none; }
   .contact__socials{ gap: 1.2rem 1.6rem; }
 }

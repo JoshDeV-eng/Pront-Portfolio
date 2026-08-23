@@ -4,6 +4,21 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
+  // -------- Custom crosshair cursor (desktop only) --------
+  var crosshair = document.getElementById('crosshair');
+  if (crosshair && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    var shown = false;
+    window.addEventListener('mousemove', function (e) {
+      crosshair.style.left = e.clientX + 'px';
+      crosshair.style.top = e.clientY + 'px';
+      if (!shown) { crosshair.classList.add('is-active'); shown = true; }
+    }, { passive: true });
+    window.addEventListener('mouseleave', function () {
+      crosshair.classList.remove('is-active');
+      shown = false;
+    });
+  }
+
   // -------- Footer year --------
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -65,6 +80,19 @@ document.addEventListener('DOMContentLoaded', function () {
     orbit.appendChild(frag);
   }
 
+  // -------- Case-file expand toggle --------
+  document.querySelectorAll('[data-expand]').forEach(function (btn) {
+    var detail = btn.nextElementSibling;
+    if (!detail || !detail.hasAttribute('data-detail')) return;
+
+    btn.addEventListener('click', function () {
+      var isOpen = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!isOpen));
+      detail.hidden = isOpen;
+      btn.querySelector('span').textContent = isOpen ? 'expand case file' : 'collapse case file';
+    });
+  });
+
   // -------- 3D tilt on project cards --------
   var tiltCards = document.querySelectorAll('[data-tilt]');
   var supportsHover = window.matchMedia('(hover: hover)').matches;
@@ -93,9 +121,19 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // -------- Scroll reveal --------
-  var revealTargets = document.querySelectorAll('.about, .work__grid .card, .skills__orbit, .contact__inner');
+  // -------- Scroll reveal (staggered) --------
+  var revealTargets = document.querySelectorAll('.about, .work__grid .card, .skills__orbit, .testimonials__grid .quote-card, .contact__inner');
   revealTargets.forEach(function (el) { el.setAttribute('data-reveal', ''); });
+
+  // Stagger children within grids so items cascade in rather than pop together
+  function staggerGroup(selector, step) {
+    document.querySelectorAll(selector).forEach(function (el, i) {
+      el.style.transitionDelay = (i * step) + 'ms';
+    });
+  }
+  staggerGroup('.work__grid .card', 70);
+  staggerGroup('.testimonials__grid .quote-card', 90);
+  staggerGroup('.skill-node', 35);
 
   var observer = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
