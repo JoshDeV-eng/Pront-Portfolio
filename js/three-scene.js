@@ -1,8 +1,8 @@
 /* ==========================================================================
-   Josh_Dev — Hero 3D Scene ("Drafting Room")
-   A pure-wireframe geometry cluster — paper-white core, cyan accent shape,
-   redline dimension rings — that drifts on its own and tilts toward the
-   pointer, like a live blueprint render. No filled surfaces, on purpose.
+   Josh_Dev — Hero 3D Scene ("Drafting Room — Monochrome")
+   A pure-wireframe geometry cluster in black & white only — bright white core,
+   dimmer grey accent shape, faint grey dimension rings — that drifts on its
+   own and tilts toward the pointer, like a live film-negative render.
    Kept lightweight (no postprocessing) to stay inside a 16ms frame budget.
    ========================================================================== */
 
@@ -20,10 +20,18 @@
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
 
-  // -------- Palette (mirrors css tokens: blueprint wireframe only) --------
-  var paper = 0xe4ebf0;
-  var cyan = 0x6fd6e8;
-  var red = 0xe4572e;
+  // -------- Palette (monochrome only — inverts with theme) --------
+  var palettes = {
+    dark:  { paper: 0xf5f4f0, cyan: 0xffffff, red: 0xc6c6c2 },
+    light: { paper: 0x121212, cyan: 0x000000, red: 0x5b5a55 }
+  };
+  function activeTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  }
+  var palette = palettes[activeTheme()];
+  var paper = palette.paper;
+  var cyan = palette.cyan;
+  var red = palette.red;
 
   var group = new THREE.Group();
   scene.add(group);
@@ -34,20 +42,20 @@
   var core = new THREE.Mesh(coreGeo, coreMat);
   group.add(core);
 
-  // Inner cyan wireframe accent shape
+  // Inner bright accent wireframe shape
   var innerGeo = new THREE.OctahedronGeometry(1.1, 0);
   var innerMat = new THREE.MeshBasicMaterial({ color: cyan, wireframe: true, transparent: true, opacity: 0.75 });
   var inner = new THREE.Mesh(innerGeo, innerMat);
   group.add(inner);
 
-  // Orbiting ring — thin redline, like a dimension circle
+  // Orbiting ring — faint dimension circle
   var ringGeo = new THREE.TorusGeometry(3.4, 0.008, 8, 120);
   var ringMat = new THREE.MeshBasicMaterial({ color: red, transparent: true, opacity: 0.55 });
   var ring = new THREE.Mesh(ringGeo, ringMat);
   ring.rotation.x = Math.PI / 2.4;
   group.add(ring);
 
-  // Secondary dashed-feel guide ring in cyan
+  // Secondary dashed-feel guide ring
   var ring2Geo = new THREE.TorusGeometry(4.3, 0.006, 6, 90);
   var ring2Mat = new THREE.MeshBasicMaterial({ color: cyan, transparent: true, opacity: 0.3 });
   var ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
@@ -70,6 +78,16 @@
   var particleMat = new THREE.PointsMaterial({ color: paper, size: 0.035, transparent: true, opacity: 0.5 });
   var particles = new THREE.Points(particleGeo, particleMat);
   scene.add(particles);
+
+  // Live-update wireframe colors when the theme toggle fires
+  window.addEventListener('themechange', function (e) {
+    var p = palettes[e.detail && e.detail.theme === 'light' ? 'light' : 'dark'];
+    coreMat.color.setHex(p.paper);
+    innerMat.color.setHex(p.cyan);
+    ringMat.color.setHex(p.red);
+    ring2Mat.color.setHex(p.cyan);
+    particleMat.color.setHex(p.paper);
+  });
 
   // -------- Pointer interaction --------
   var pointer = { x: 0, y: 0 };
